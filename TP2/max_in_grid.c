@@ -12,6 +12,7 @@
 #include <stdio.h>  // printf, fopen etc.
 #include <stdlib.h> // atoi, qsort, malloc etc.
 #include <time.h>   // time, clock
+#include <stdint.h> // uint64_t
 
 // Abstract values, entry for a values_array_t array
 typedef struct {
