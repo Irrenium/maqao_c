@@ -104,7 +104,7 @@ int main (int argc, char *argv[]) {
       if (med < 500) {
          printf ("Warning: median time is less than 500 seconds. Accurary is limited for that instance\n");
       }
-      printf ("MED %.3f seconds (%.2f per inner-iter)\n",
+      printf ("MED %.3ld seconds (%.2f per inner-iter)\n",
               med, (float) med / nb_inner_iters);
 
       // Stability: (med-min)/min
