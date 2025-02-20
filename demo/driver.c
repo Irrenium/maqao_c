@@ -84,7 +84,7 @@ int main (int argc, char *argv[]) {
       }
 
       const clock_t t2 = clock();
-      tdiff[m] = (t2 - t1) / CLOCKS_PER_SEC;
+      tdiff[m] = (t2 - t1);
 
 //      const uint64_t t2 = rdtsc();
 //      tdiff[m] = t2 - t1;
@@ -105,12 +105,12 @@ int main (int argc, char *argv[]) {
                "Rerun with more measure-repetitions\n");
       return EXIT_FAILURE;
    }
-   printf ("MIN %lu RDTSC-cycles (%.2f per inner-iter)\n",
-           min, (float) min / nb_inner_iters);
+   printf ("MIN %.3f seconds (%.2f per inner-iter)\n",
+           ( (float) min/ (float) CLOCKS_PER_SEC), ( (float) min/ (float) CLOCKS_PER_SEC) / nb_inner_iters);
 
    // Median value
    const uint64_t med = tdiff[NB_METAS/2];
-   printf ("MED %lu RDTSC-cycles (%.2f per inner-iter)\n",
+   printf ("MED %.3f seconds (%.2f per inner-iter)\n",
            med, (float) med / nb_inner_iters);
 
    // Stability: (med-min)/min

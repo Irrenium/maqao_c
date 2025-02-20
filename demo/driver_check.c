@@ -5,7 +5,7 @@
 //extern uint64_t rdtsc ();
 
 // TODO: adjust for each kernel
-extern void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]);
+extern void kernel (unsigned n, float a[n], float b[n][n], float c[n][n]);
 
 // TODO: adjust for each kernel
 static void init_array_2 (int n, float x[n][n]) {

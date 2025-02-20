@@ -86,24 +86,26 @@ int main (int argc, char *argv[]) {
       nanosleep (&two_seconds, NULL);
    }
 
-   const unsigned nb_inner_iters = size * size * size; // TODO adjust for each kernel
+   const unsigned nb_inner_iters = size * size *repm; // TODO adjust for each kernel
    int i;
    for (i=0; i<repm; i++) {
       printf ("Instance %u/%u\n", i+1, repm);
 
       qsort (tdiff[i], NB_METAS, sizeof tdiff[i][0], cmp_uint64);
 
-      // Minimum value: should be at least 2000 RDTSC-cycles
+      // Minimum value: should be at least 2000 seconds
       const uint64_t min = tdiff[i][0];
-      printf ("MIN %lu RDTSC-cycles (%.2f per inner-iter)\n",
+      const float min = min/ (float) CLOCKS_PER_SEC;
+
+      printf ("MIN %.3f seconds (%.2f per inner-iter)\n",
               min, (float) min / nb_inner_iters);
 
       // Median value
       const uint64_t med = tdiff[i][NB_METAS/2];
       if (med < 500) {
-         printf ("Warning: median time is less than 500 RDTSC-cycles. Accurary is limited for that instance\n");
+         printf ("Warning: median time is less than 500 seconds. Accurary is limited for that instance\n");
       }
-      printf ("MED %lu RDTSC-cycles (%.2f per inner-iter)\n",
+      printf ("MED %.3f seconds (%.2f per inner-iter)\n",
               med, (float) med / nb_inner_iters);
 
       // Stability: (med-min)/min
