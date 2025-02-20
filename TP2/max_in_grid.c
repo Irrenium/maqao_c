@@ -72,71 +72,37 @@ int generate_random_values (const char *file_name, unsigned nx, unsigned ny)
 }
 
 // Loads values from a file written by generate_random_values() to the grid
-int load_values (const char *file_name, value_grid_t *val_grid)
-{
-   printf ("Load values from %s...\n", file_name);
+int load_values(const char *file_name, value_grid_t *val_grid) {
+    FILE *fp = fopen(file_name, "r");
+    if (!fp) return -1;
 
-   // Open input file (containing one coordinate per line)
-   FILE *fp = fopen (file_name, "r");
-   if (!fp) {
-      fprintf (stderr, "Cannot read %s\n", file_name);
-      return -1;
-   }
+    // Pre-allocate all memory at once
+    if (fscanf(fp, "%u %u", &val_grid->nx, &val_grid->ny) != 2) {
+        fclose(fp);
+        return 1;
+    }
 
-   char buf [100];
+    size_t total_entries = val_grid->nx * val_grid->ny;
+    val_grid->entries = malloc(total_entries * sizeof(value_t*));
+    value_t *values_block = malloc(total_entries * sizeof(value_t));
+    sum_bytes += total_entries * (sizeof(value_t*) + sizeof(value_t));
 
-   // Load grid size from input file (first line)
-   unsigned nx, ny;
-   if (fgets (buf, sizeof buf, fp) != NULL &&
-       sscanf (buf, "%u %u", &nx, &ny) != 2) {
-      fprintf (stderr, "Failed to parse the first line from the input file\n");
-      fclose (fp);
-      return 1;
-   }
+    // Read values in batches
+    #define READ_BUFFER_SIZE 16384
+    char buffer[READ_BUFFER_SIZE];
+    size_t entry_idx = 0;
+    
+    while (fgets(buffer, sizeof(buffer), fp) && entry_idx < total_entries) {
+        float v1, v2;
+        if (sscanf(buffer, "%f %f", &v1, &v2) != 2) continue;
+        
+        values_block[entry_idx] = (value_t){v1, v2};
+        val_grid->entries[entry_idx] = &values_block[entry_idx];
+        entry_idx++;
+    }
 
-   // Update output array length
-   val_grid->nx = nx;
-   val_grid->ny = ny;
-
-   // Initialize output array as empty
-   val_grid->entries = NULL;
-
-   // Load pairs from input file (one per line)
-   unsigned nb_inserted_values = 0;
-   while (fgets (buf, sizeof buf, fp) != NULL) {
-      // Parse current line (v1, v2)
-      float v1, v2;
-      if (sscanf (buf, "%f %f", &v1, &v2) != 2) {
-         fprintf (stderr, "Failed to parse a line from the input file\n");
-         fclose (fp);
-         return 1;
-      }
-
-      // Create a new pair: allocate memory and set it from the current line
-      value_t *new_value = malloc (sizeof *new_value);
-      sum_bytes += sizeof *new_value;
-      new_value->v1 = v1;
-      new_value->v2 = v2;
-
-      // Enlarge (reallocate) the output array to save one more point
-      val_grid->entries = realloc (val_grid->entries,
-                                   (nb_inserted_values + 1) * sizeof val_grid->entries[0]);
-      sum_bytes += sizeof val_grid->entries[0];
-
-      // Append the new point (pointer to) to the output array
-      val_grid->entries [nb_inserted_values++] = new_value;
-   }
-
-   // Close input file
-   fclose (fp);
-
-   if (nb_inserted_values != (nx * ny)) {
-      fprintf (stderr, "Mismatch between the number of parsed values (%u) and the grid size (%u x %u)\n",
-               nb_inserted_values, nx, ny);
-      return 1;
-   }
-
-   return 0;
+    fclose(fp);
+    return (entry_idx == total_entries) ? 0 : 1;
 }
 
 // Relate pairs to coordinates
