@@ -94,8 +94,7 @@ int main (int argc, char *argv[]) {
       qsort (tdiff[i], NB_METAS, sizeof tdiff[i][0], cmp_uint64);
 
       // Minimum value: should be at least 2000 seconds
-      const uint64_t min = tdiff[i][0];
-      min = min/ (float) CLOCKS_PER_SEC;
+      const float min = (float)(tdiff[i][0])/ (float) CLOCKS_PER_SEC;
 
       printf ("MIN %.3f seconds (%.2f per inner-iter)\n",
               min, (float) min / nb_inner_iters);
