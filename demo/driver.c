@@ -105,7 +105,7 @@ int main (int argc, char *argv[]) {
                "Rerun with more measure-repetitions\n");
       return EXIT_FAILURE;
    }
-   const float seconds = (float) min/ (float) CLOCKS_PER_SEC)/ nb_inner_iters;
+   const float seconds = (float) min/ (float) CLOCKS_PER_SEC/ nb_inner_iters;
    printf ("MIN %.3f seconds (%.2f per inner-iter per milliseconds)\n",
            seconds, seconds * 1000);
 
