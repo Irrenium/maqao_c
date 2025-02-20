@@ -11,8 +11,6 @@
 
 #include <stdio.h>  // printf, fopen etc.
 #include <stdlib.h> // atoi, qsort, malloc etc.
-#include <time.h>   // time, clock
-#include <stdint.h> // uint64_t
 
 // Abstract values, entry for a values_array_t array
 typedef struct {
@@ -40,84 +38,37 @@ typedef struct {
 size_t sum_bytes;       // Cumulated sum of allocated bytes (malloc, realloc)
 
 // Pseudo-randomly generates 'n' values and writes them to a text file
-static uint64_t xoshiro_state[4];
+int generate_random_values (const char *file_name, unsigned nx, unsigned ny)
+{
+   printf ("Generate %u x %u values and dump them to %s...\n", nx, ny, file_name);
 
-static inline uint64_t rotl(const uint64_t x, int k) {
-    return (x << k) | (x >> (64 - k));
-}
+   // Open/create output file
+   FILE *fp = fopen (file_name, "w");
+   if (!fp) {
+      fprintf (stderr, "Cannot write %s\n", file_name);
+      return -1;
+   }
 
-static uint64_t next_random(void) {
-    const uint64_t result = rotl(xoshiro_state[1] * 5, 7) * 9;
-    const uint64_t t = xoshiro_state[1] << 17;
+   // Save nx and ny on the first line
+   if (fprintf (fp, "%u %u\n", nx, ny) <= 0)
+      return -2;
 
-    xoshiro_state[2] ^= xoshiro_state[0];
-    xoshiro_state[3] ^= xoshiro_state[1];
-    xoshiro_state[1] ^= xoshiro_state[2];
-    xoshiro_state[0] ^= xoshiro_state[3];
+   // Generate values (one per line)
+   unsigned i, j;
+   for (i=0; i<nx; i++) {
+      for (j=0; j<ny; j++) {
+         const float v1 = (float) rand() / RAND_MAX;
+         const float v2 = (float) rand() / RAND_MAX;
 
-    xoshiro_state[2] ^= t;
-    xoshiro_state[3] = rotl(xoshiro_state[3], 45);
+         if (fprintf (fp, "%lf %lf\n", v1, v2) <= 0)
+            return -2;
+      }
+   }
 
-    return result;
-}
+   // Close output file
+   fclose (fp);
 
-static inline float random_float(void) {
-    return (float)(next_random() >> 11) * 0x1.0p-53f;
-}
-
-#define BUFFER_SIZE 65536
-
-int generate_random_values(const char *file_name, unsigned nx, unsigned ny) {
-    printf("Generate %u x %u values and dump them to %s...\n", nx, ny, file_name);
-
-    uint64_t seed = time(NULL) ^ clock();
-    for(int i = 0; i < 4; i++) {
-        xoshiro_state[i] = seed = seed * 6364136223846793005ULL + 1;
-    }
-
-    FILE *fp = fopen(file_name, "wb");
-    if (!fp) {
-        fprintf(stderr, "Cannot write %s\n", file_name);
-        return -1;
-    }
-
-    fprintf(fp, "%u %u\n", nx, ny);
-
-    char buffer[BUFFER_SIZE];
-    size_t buf_pos = 0;
-    
-    #define BATCH_SIZE 1024
-    float v1_batch[BATCH_SIZE];
-    float v2_batch[BATCH_SIZE];
-    
-    for(unsigned i = 0; i < nx; i++) {
-        for(unsigned j = 0; j < ny;) {
-            unsigned batch_count = (ny - j < BATCH_SIZE) ? ny - j : BATCH_SIZE;
-            for(unsigned k = 0; k < batch_count; k++) {
-                v1_batch[k] = random_float();
-                v2_batch[k] = random_float();
-            }
-            
-            for(unsigned k = 0; k < batch_count; k++) {
-                buf_pos += snprintf(buffer + buf_pos, BUFFER_SIZE - buf_pos,
-                                  "%.6f %.6f\n", v1_batch[k], v2_batch[k]);
-                
-                if(buf_pos > BUFFER_SIZE - 100) {
-                    fwrite(buffer, 1, buf_pos, fp);
-                    buf_pos = 0;
-                }
-            }
-            
-            j += batch_count;
-        }
-    }
-    
-    if(buf_pos > 0) {
-        fwrite(buffer, 1, buf_pos, fp);
-    }
-
-    fclose(fp);
-    return 0;
+   return 0;
 }
 
 // Loads values from a file written by generate_random_values() to the grid
