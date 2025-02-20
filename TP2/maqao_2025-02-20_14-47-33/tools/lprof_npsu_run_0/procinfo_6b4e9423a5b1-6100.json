@@ -1,0 +1,13 @@
+{
+  "content": {
+    "hostname"           : "6b4e9423a5b1",
+    "max_frequency"          : "0",
+    "cur_frequency"      : "0",
+    "driver_frequency"   : "NA",
+    "scaling_governor"   : "NA",
+    "huge_pages"         : "always",
+    "os_version"         : "Linux 6.10.14-linuxkit #1 SMP Fri Nov 29 17:22:03 UTC 2024",
+    "perf_event_paranoid"      : "2",
+    "is_lstopo"          : false,
+  }
+}
