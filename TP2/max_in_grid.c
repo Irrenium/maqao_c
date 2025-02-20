@@ -73,53 +73,86 @@ int generate_random_values (const char *file_name, unsigned nx, unsigned ny)
 
 // Loads values from a file written by generate_random_values() to the grid
 int load_values(const char *file_name, value_grid_t *val_grid) {
-    FILE *fp = fopen(file_name, "r");
-    if (!fp) return -1;
+    printf("Load values from %s...\n", file_name);
 
-    if (fscanf(fp, "%u %u", &val_grid->nx, &val_grid->ny) != 2) {
+    // Open input file (containing one coordinate per line)
+    FILE *fp = fopen(file_name, "r");
+    if (!fp) {
+        fprintf(stderr, "Cannot read %s\n", file_name);
+        return -1;
+    }
+
+    char buf[100];
+
+    // Load grid size from input file (first line)
+    unsigned nx, ny;
+    if (fgets(buf, sizeof buf, fp) != NULL &&
+        sscanf(buf, "%u %u", &nx, &ny) != 2) {
+        fprintf(stderr, "Failed to parse the first line from the input file\n");
         fclose(fp);
         return 1;
     }
 
-    size_t total_entries = val_grid->nx * val_grid->ny;
-    
-    // Allocate array of pointers
-    val_grid->entries = calloc(total_entries, sizeof(value_t*));
+    // Update output array length
+    val_grid->nx = nx;
+    val_grid->ny = ny;
+
+    // Initialize output array with an initial capacity
+    val_grid->entries = malloc(10 * sizeof(value_t*)); // Start with space for 10 entries
     if (!val_grid->entries) {
         fclose(fp);
-        return -1;
+        return -1; // Memory allocation failure
     }
-    sum_bytes += total_entries * sizeof(value_t*);
+    size_t capacity = 10; // Current capacity
+    unsigned nb_inserted_values = 0;
 
-    char buffer[1024];
-    size_t entry_idx = 0;
-    
-    // Skip the newline after fscanf
-    fgets(buffer, sizeof(buffer), fp);
-    
-    while (fgets(buffer, sizeof(buffer), fp) && entry_idx < total_entries) {
+    // Load pairs from input file (one per line)
+    while (fgets(buf, sizeof buf, fp) != NULL) {
+        // Parse current line (v1, v2)
         float v1, v2;
-        if (sscanf(buffer, "%f %f", &v1, &v2) != 2) continue;
-        
-        value_t *new_value = malloc(sizeof(value_t));
-        if (!new_value) {
-            // Cleanup on error
-            for (size_t i = 0; i < entry_idx; i++) {
-                free(val_grid->entries[i]);
-            }
-            free(val_grid->entries);
+        if (sscanf(buf, "%f %f", &v1, &v2) != 2) {
+            fprintf(stderr, "Failed to parse a line from the input file\n");
+            free(val_grid->entries); // Free allocated memory
             fclose(fp);
-            return -1;
+            return 1;
         }
-        
+
+        // Create a new pair: allocate memory and set it from the current line
+        value_t *new_value = malloc(sizeof(*new_value));
+        if (!new_value) {
+            free(val_grid->entries); // Free allocated memory
+            fclose(fp);
+            return -1; // Memory allocation failure
+        }
         new_value->v1 = v1;
         new_value->v2 = v2;
-        val_grid->entries[entry_idx++] = new_value;
-        sum_bytes += sizeof(value_t);
+
+        // Enlarge (reallocate) the output array if necessary
+        if (nb_inserted_values >= capacity) {
+            capacity *= 2; // Double the capacity
+            val_grid->entries = realloc(val_grid->entries, capacity * sizeof(value_t*));
+            if (!val_grid->entries) {
+                free(new_value); // Free the new value
+                fclose(fp);
+                return -1; // Memory allocation failure
+            }
+        }
+
+        // Append the new point (pointer to) to the output array
+        val_grid->entries[nb_inserted_values++] = new_value;
     }
 
+    // Close input file
     fclose(fp);
-    return (entry_idx == total_entries) ? 0 : 1;
+
+    if (nb_inserted_values != (nx * ny)) {
+        fprintf(stderr, "Mismatch between the number of parsed values (%u) and the grid size (%u x %u)\n",
+                nb_inserted_values, nx, ny);
+        free(val_grid->entries); // Free allocated memory
+        return 1;
+    }
+
+    return 0;
 }
 
 // Relate pairs to coordinates
