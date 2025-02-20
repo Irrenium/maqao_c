@@ -19,16 +19,21 @@ void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]) {
 
 #include <string.h> // memset
 
-/* ijk -> ikj permutation to make stride 1 the innermost loop */
-void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]) {
-   int i, j, k;
+void kernel(unsigned n, float a[n], float b[n], float c[n][n]) {
+    unsigned i, j;
 
-   memset (c, 0, n * n * sizeof c[0][0]);
-
-   for (i=0; i<n; i++)
-      for (k=0; k<n; k++)
-         for (j=0; j<n; j++)
-            c[i][j] += a[i][k] * b[k][j];
+    for (i = 0; i < n; i++) {
+        float temp = 0.0f;
+        // Unrolling the inner loop for better performance
+        for (j = 0; j + 4 <= n; j += 4) {
+            temp += c[i][j] + c[i][j+1] + c[i][j+2] + c[i][j+3];
+        }
+        // Handle remaining elements
+        for (; j < n; j++) {
+            temp += c[i][j];
+        }
+        a[i] += temp / b[i];  // Reduce division operations
+    }
 }
 
 #else
