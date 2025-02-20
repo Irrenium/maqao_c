@@ -1,0 +1,22 @@
+
+* Info: Dumping samples (host 6b4e9423a5b1, process 5927)
+* Info: Dumping source info for callchain nodes (host 6b4e9423a5b1, process 5927)
+* Info: Building/writing metadata (host 6b4e9423a5b1)
+* Info: Finished collect step (host 6b4e9423a5b1, process 5927)
+
+Your experiment path is /my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0
+
+To display your profiling results:
+########################################################################################################################################
+#    LEVEL    |     REPORT     |                                                COMMAND                                                #
+########################################################################################################################################
+#  Functions  |  Cluster-wide  |  maqao lprof -df xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0      #
+#  Functions  |  Per-node      |  maqao lprof -df -dn xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0  #
+#  Functions  |  Per-process   |  maqao lprof -df -dp xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0  #
+#  Functions  |  Per-thread    |  maqao lprof -df -dt xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0  #
+#  Loops      |  Cluster-wide  |  maqao lprof -dl xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0      #
+#  Loops      |  Per-node      |  maqao lprof -dl -dn xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0  #
+#  Loops      |  Per-process   |  maqao lprof -dl -dp xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0  #
+#  Loops      |  Per-thread    |  maqao lprof -dl -dt xp=/my_folder/demo/maqao_c/TP2/maqao_2025-02-20_14-20-45/tools/lprof_npsu_run_0  #
+########################################################################################################################################
+
