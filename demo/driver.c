@@ -7,15 +7,22 @@
 extern uint64_t rdtsc ();
 
 // TODO: adjust for each kernel
-extern void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]);
+extern void kernel (unsigned n, float a[n], float b[n], float c[n][n]);
 
 // TODO: adjust for each kernel
-static void init_array (int n, float a[n][n]) {
+static void init_array_2 (int n, float x[n][n]) {
    int i, j;
 
    for (i=0; i<n; i++)
       for (j=0; j<n; j++)
-         a[i][j] = (float) rand() / RAND_MAX;
+         x[i][j] = (float) rand() / RAND_MAX;
+}
+
+static void init_array_1 (int n, float a[n]) {
+   int i;
+
+   for (i=0; i<n; i++)
+         a[i] = (float) rand() / RAND_MAX;
 }
 
 static int cmp_uint64 (const void *a, const void *b) {
@@ -49,14 +56,15 @@ int main (int argc, char *argv[]) {
       unsigned i;
 
       /* allocate arrays. TODO: adjust for each kernel */
-      float (*a)[size] = malloc (size * size * sizeof a[0][0]);
-      float (*b)[size] = malloc (size * size * sizeof b[0][0]);
+      float (*a)[size] = malloc (size * size * sizeof a[0]);
+      float (*b)[size] = malloc (size * size * sizeof b[0]);
       float (*c)[size] = malloc (size * size * sizeof c[0][0]);
 
       /* init arrays */
       srand(0);
-      init_array (size, a);
-      init_array (size, b);
+      init_array_1 (size, a);
+      init_array_1 (size, b);
+      init_array_2 (size, c);
 
       /* warmup (repw repetitions in first meta, 1 repet in next metas) */
       if (m == 0) {
