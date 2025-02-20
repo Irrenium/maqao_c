@@ -4,7 +4,7 @@
 
 #define NB_METAS 31
 
-extern uint64_t rdtsc ();
+//extern uint64_t rdtsc ();
 
 // TODO: adjust for each kernel
 extern void kernel (unsigned n, float a[n], float b[n], float c[n][n]);
@@ -75,12 +75,17 @@ int main (int argc, char *argv[]) {
       }
 
       /* measure repm repetitions */
-      const uint64_t t1 = rdtsc();
+//      const uint64_t t1 = rdtsc();
+      const clock_t t1 = clock();
       for (i=0; i<repm; i++) {
          kernel (size, a, b, c);
       }
-      const uint64_t t2 = rdtsc();
-      tdiff[m] = t2 - t1;
+      
+      const clock_t t2 = clock();
+      tdiff[m] = (t2 - t1) / CLOCKS_PER_SEC;
+
+//      const uint64_t t2 = rdtsc();
+//      tdiff[m] = t2 - t1;
 
       /* free arrays. TODO: adjust for each kernel */
       free (a);
