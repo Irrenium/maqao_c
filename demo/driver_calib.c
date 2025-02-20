@@ -5,18 +5,25 @@
 
 #define NB_METAS 5
 
-extern uint64_t rdtsc ();
+//extern uint64_t rdtsc ();
 
 // TODO: adjust for each kernel
-extern void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]);
+extern void kernel (unsigned n, float a[n], float b[n][n], float c[n][n]);
 
 // TODO: adjust for each kernel
-static void init_array (int n, float a[n][n]) {
+static void init_array_2 (int n, float a[n][n]) {
    int i, j;
 
    for (i=0; i<n; i++)
       for (j=0; j<n; j++)
          a[i][j] = (float) rand() / RAND_MAX;
+}
+
+static void init_array_2 (int n, float a[n]) {
+   int i;
+
+   for (i=0; i<n; i++)
+         a[i] = (float) rand() / RAND_MAX;
 }
 
 static int cmp_uint64 (const void *a, const void *b) {
@@ -49,20 +56,23 @@ int main (int argc, char *argv[]) {
       unsigned i;
 
       /* allocate arrays. TODO: adjust for each kernel */
-      float (*a)[size] = malloc (size * size * sizeof a[0][0]);
-      float (*b)[size] = malloc (size * size * sizeof b[0][0]);
+      float *a = malloc (size * sizeof a[0]);
+      float *b = malloc (size * sizeof b[0]);
       float (*c)[size] = malloc (size * size * sizeof c[0][0]);
 
       /* init arrays */
       srand(0);
-      init_array (size, a);
-      init_array (size, b);
+      init_array_1 (size, a);
+      init_array_1 (size, b);
+      init_array_2 (size, c);
 
       // No warmup, measure individual instances
       for (i=0; i<repm; i++) {
-         const uint64_t t1 = rdtsc();
+         //const uint64_t t1 = rdtsc();
+         const clock_t t1 = clock();
          kernel (size, a, b, c);
-         const uint64_t t2 = rdtsc();
+         //const uint64_t t2 = rdtsc();
+         const clock_t t2 = clock();
          tdiff[i][m] = t2 - t1;
       }
 
