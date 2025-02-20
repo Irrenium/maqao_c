@@ -76,29 +76,46 @@ int load_values(const char *file_name, value_grid_t *val_grid) {
     FILE *fp = fopen(file_name, "r");
     if (!fp) return -1;
 
-    // Pre-allocate all memory at once
     if (fscanf(fp, "%u %u", &val_grid->nx, &val_grid->ny) != 2) {
         fclose(fp);
         return 1;
     }
 
     size_t total_entries = val_grid->nx * val_grid->ny;
-    val_grid->entries = malloc(total_entries * sizeof(value_t*));
-    value_t *values_block = malloc(total_entries * sizeof(value_t));
-    sum_bytes += total_entries * (sizeof(value_t*) + sizeof(value_t));
+    
+    // Allocate array of pointers
+    val_grid->entries = calloc(total_entries, sizeof(value_t*));
+    if (!val_grid->entries) {
+        fclose(fp);
+        return -1;
+    }
+    sum_bytes += total_entries * sizeof(value_t*);
 
-    // Read values in batches
-    #define READ_BUFFER_SIZE 16384
-    char buffer[READ_BUFFER_SIZE];
+    char buffer[1024];
     size_t entry_idx = 0;
+    
+    // Skip the newline after fscanf
+    fgets(buffer, sizeof(buffer), fp);
     
     while (fgets(buffer, sizeof(buffer), fp) && entry_idx < total_entries) {
         float v1, v2;
         if (sscanf(buffer, "%f %f", &v1, &v2) != 2) continue;
         
-        values_block[entry_idx] = (value_t){v1, v2};
-        val_grid->entries[entry_idx] = &values_block[entry_idx];
-        entry_idx++;
+        value_t *new_value = malloc(sizeof(value_t));
+        if (!new_value) {
+            // Cleanup on error
+            for (size_t i = 0; i < entry_idx; i++) {
+                free(val_grid->entries[i]);
+            }
+            free(val_grid->entries);
+            fclose(fp);
+            return -1;
+        }
+        
+        new_value->v1 = v1;
+        new_value->v2 = v2;
+        val_grid->entries[entry_idx++] = new_value;
+        sum_bytes += sizeof(value_t);
     }
 
     fclose(fp);
