@@ -8,9 +8,9 @@
  * - Nb points Y: input size along Y
  * - Recommended: with the baseline implementation, good starting point is 2000 x 3000
  */
-
 #include <stdio.h>  // printf, fopen, etc.
-#include <stdlib.h> // atoi, qsort, malloc, free, etc.
+#include <stdlib.h> // atoi, qsort, malloc, free, etc>
+#include <string.h> // snprintf
 
 // Abstract values
 typedef struct {
@@ -48,18 +48,27 @@ int generate_random_values(const char *file_name, unsigned nx, unsigned ny) {
       return -1;
    }
 
-   // Save nx and ny on the first line
-   if (fprintf(fp, "%u %u\n", nx, ny) <= 0)
+   // Write dimensions (nx, ny) on the first line
+   char header[50];
+   snprintf(header, sizeof(header), "%u %u\n", nx, ny);
+   if (fputs(header, fp) == EOF) {
+      fclose(fp);
       return -2;
+   }
 
-   // Generate values (one per line)
+   // Generate values and save them
+   char line[100];
    for (unsigned i = 0; i < nx; i++) {
       for (unsigned j = 0; j < ny; j++) {
          const float v1 = (float)rand() / RAND_MAX;
          const float v2 = (float)rand() / RAND_MAX;
 
-         if (fprintf(fp, "%f %f\n", v1, v2) <= 0)
+         // Format the line and write it with `fputs`
+         snprintf(line, sizeof(line), "%f %f\n", v1, v2);
+         if (fputs(line, fp) == EOF) {
+            fclose(fp);
             return -2;
+         }
       }
    }
 
