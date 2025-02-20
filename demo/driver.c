@@ -110,7 +110,7 @@ int main (int argc, char *argv[]) {
 
    // Median value
    const uint64_t med = tdiff[NB_METAS/2];
-   printf ("MED %.3f seconds (%.2f per inner-iter)\n",
+   printf ("MED %.3ld seconds (%.2f per inner-iter)\n",
            med, (float) med / nb_inner_iters);
 
    // Stability: (med-min)/min
