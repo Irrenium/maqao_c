@@ -1,0 +1,6 @@
+********************************************************************************
+MAQAO 2.21.1 - Build information not available || 2025/02/20
+maqao_recompiled oneview -R1 -- ./measure 2000 100 10 
+CPY:  [true] ./measure --> /my_folder/demo/maqao_c/demo/maqao_2025-02-20_13-22-17/binaries/measure
+CMD:   /my_folder/bin/maqao_recompiled lprof _caller=oneview  --xp="/my_folder/demo/maqao_c/demo/maqao_2025-02-20_13-22-17/tools/lprof_npsu_run_0" --mpi-command="" --collect-CPU-time-intervals --collect-topology   -- /my_folder/demo/maqao_c/demo/maqao_2025-02-20_13-22-17/binaries/measure  2000 100 10
+CMD:  /my_folder/bin/maqao_recompiled otter  -input=/my_folder/demo/maqao_c/demo/maqao_2025-02-20_13-22-17/OTTER/input_manifest.csv -output=/my_folder/demo/maqao_c/demo/maqao_2025-02-20_13-22-17/OTTER/output_manifest.csv --reduce-threads-files=on
