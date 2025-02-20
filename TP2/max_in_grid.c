@@ -8,9 +8,8 @@
  * - Nb points Y: input size along Y
  * - Recommended: with the baseline implementation, good starting point is 2000 x 3000
  */
-#include <stdio.h>  // printf, fopen, etc.
-#include <stdlib.h> // atoi, qsort, malloc, free, etc>
-#include <string.h> // snprintf
+ #include <stdio.h>  // printf, fopen, etc.
+#include <stdlib.h> // atoi, malloc, free, etc.
 
 // Abstract values
 typedef struct {
@@ -31,103 +30,75 @@ typedef struct {
 
 // Dynamic array of pos_val_t entries
 typedef struct {
-   unsigned nx, ny;   // number of values along X, Y
+   unsigned nx, ny;  // number of values along X, Y
    pos_val_t *entries; // array of pos_val_t (contiguous block)
 } pos_val_grid_t;
 
-size_t sum_bytes; // Cumulated sum of allocated bytes (malloc, realloc)
+size_t sum_bytes = 0; // Cumulated sum of allocated bytes (malloc, realloc)
 
-// Pseudo-randomly generates 'n' values and writes them to a text file
+// Pseudo-randomly generates 'n' values and writes them to a binary file
 int generate_random_values(const char *file_name, unsigned nx, unsigned ny) {
-   printf("Generate %u x %u values and dump them to %s...\n", nx, ny, file_name);
+   printf("Generate %u x %u values and dump them to %s (binary)...\n", nx, ny, file_name);
 
-   // Open/create output file
-   FILE *fp = fopen(file_name, "w");
+   FILE *fp = fopen(file_name, "wb");
    if (!fp) {
-      fprintf(stderr, "Cannot write %s\n", file_name);
+      fprintf(stderr, "Cannot write to %s\n", file_name);
       return -1;
    }
 
-   // Write dimensions (nx, ny) on the first line
-   char header[50];
-   snprintf(header, sizeof(header), "%u %u\n", nx, ny);
-   if (fputs(header, fp) == EOF) {
-      fclose(fp);
-      return -2;
-   }
+   // Write dimensions (nx, ny)
+   fwrite(&nx, sizeof(unsigned), 1, fp);
+   fwrite(&ny, sizeof(unsigned), 1, fp);
 
-   // Generate values and save them
-   char line[100];
+   // Generate and write values
    for (unsigned i = 0; i < nx; i++) {
       for (unsigned j = 0; j < ny; j++) {
-         const float v1 = (float)rand() / RAND_MAX;
-         const float v2 = (float)rand() / RAND_MAX;
-
-         // Format the line and write it with `fputs`
-         snprintf(line, sizeof(line), "%f %f\n", v1, v2);
-         if (fputs(line, fp) == EOF) {
-            fclose(fp);
-            return -2;
-         }
+         value_t val = {(float)rand() / RAND_MAX, (float)rand() / RAND_MAX};
+         fwrite(&val, sizeof(value_t), 1, fp);
       }
    }
 
-   // Close output file
    fclose(fp);
-
    return 0;
 }
 
-// Loads values from a file written by generate_random_values()
+// Loads values from a binary file written by generate_random_values()
 int load_values(const char *file_name, value_grid_t *val_grid) {
-   printf("Load values from %s...\n", file_name);
+   printf("Load values from %s (binary)...\n", file_name);
 
-   // Open input file
-   FILE *fp = fopen(file_name, "r");
+   FILE *fp = fopen(file_name, "rb");
    if (!fp) {
       fprintf(stderr, "Cannot read %s\n", file_name);
       return -1;
    }
 
-   char buf[100];
-
-   // Load grid size from input file (first line)
-   unsigned nx, ny;
-   if (fgets(buf, sizeof buf, fp) != NULL &&
-       sscanf(buf, "%u %u", &nx, &ny) != 2) {
-      fprintf(stderr, "Failed to parse the first line from the input file\n");
+   // Read grid size
+   if (fread(&val_grid->nx, sizeof(unsigned), 1, fp) != 1 ||
+       fread(&val_grid->ny, sizeof(unsigned), 1, fp) != 1) {
+      fprintf(stderr, "Failed to read grid size\n");
       fclose(fp);
       return 1;
    }
 
-   // Update grid size
-   val_grid->nx = nx;
-   val_grid->ny = ny;
-
-   // Allocate a single block for all grid values
-   val_grid->entries = malloc(nx * ny * sizeof(value_t));
+   // Allocate memory for the grid
+   unsigned total_elements = val_grid->nx * val_grid->ny;
+   val_grid->entries = malloc(total_elements * sizeof(value_t));
    if (!val_grid->entries) {
+      fprintf(stderr, "Memory allocation failed\n");
       fclose(fp);
-      return -1; // Memory allocation failure
+      return -1;
    }
-   sum_bytes += nx * ny * sizeof(value_t);
+   sum_bytes += total_elements * sizeof(value_t);
 
-   // Load values from the file
-   value_t *entry = val_grid->entries;
-   for (unsigned i = 0; i < nx * ny; i++) {
-      if (fgets(buf, sizeof buf, fp) == NULL ||
-          sscanf(buf, "%f %f", &entry->v1, &entry->v2) != 2) {
-         fprintf(stderr, "Failed to parse a line from the input file\n");
-         free(val_grid->entries); // Free allocated memory
-         fclose(fp);
-         return 1;
-      }
-      entry++;
+   // Read values
+   if (fread(val_grid->entries, sizeof(value_t), total_elements, fp) != total_elements) {
+      fprintf(stderr, "Failed to read values\n");
+      free(val_grid->entries);
+      fclose(fp);
+      return 1;
    }
 
-   // Close input file
    fclose(fp);
-
    return 0;
 }
 
@@ -136,25 +107,22 @@ void load_positions(value_grid_t src, pos_val_grid_t *dst) {
    dst->nx = src.nx;
    dst->ny = src.ny;
 
-   // Allocate a single block for all pos_val_t entries
-   dst->entries = malloc(src.nx * src.ny * sizeof(pos_val_t));
+   unsigned total_elements = src.nx * src.ny;
+
+   // Allocate memory for positions
+   dst->entries = malloc(total_elements * sizeof(pos_val_t));
    if (!dst->entries) {
       fprintf(stderr, "Memory allocation failed for positions\n");
       exit(EXIT_FAILURE);
    }
-   sum_bytes += src.nx * src.ny * sizeof(pos_val_t);
+   sum_bytes += total_elements * sizeof(pos_val_t);
 
    // Populate the positions
-   for (unsigned i = 0; i < src.nx; i++) {
-      for (unsigned j = 0; j < src.ny; j++) {
-         const value_t *src_val = &src.entries[i * src.ny + j];
-         pos_val_t *dst_val = &dst->entries[i * src.ny + j];
-
-         dst_val->x = i;
-         dst_val->y = j;
-         dst_val->v1 = src_val->v1;
-         dst_val->v2 = src_val->v2;
-      }
+   for (unsigned i = 0; i < total_elements; i++) {
+      dst->entries[i].x = i / src.ny;
+      dst->entries[i].y = i % src.ny;
+      dst->entries[i].v1 = src.entries[i].v1;
+      dst->entries[i].v2 = src.entries[i].v2;
    }
 }
 
@@ -163,7 +131,9 @@ pos_val_t *find_max_v1(const pos_val_grid_t *pv_grid) {
    printf("Compute maximum v1...\n");
 
    pos_val_t *max_val = &pv_grid->entries[0];
-   for (unsigned i = 1; i < pv_grid->nx * pv_grid->ny; i++) {
+   unsigned total_elements = pv_grid->nx * pv_grid->ny;
+
+   for (unsigned i = 1; i < total_elements; i++) {
       if (pv_grid->entries[i].v1 > max_val->v1) {
          max_val = &pv_grid->entries[i];
       }
@@ -176,7 +146,9 @@ pos_val_t *find_max_v2(const pos_val_grid_t *pv_grid) {
    printf("Compute maximum v2...\n");
 
    pos_val_t *max_val = &pv_grid->entries[0];
-   for (unsigned i = 1; i < pv_grid->nx * pv_grid->ny; i++) {
+   unsigned total_elements = pv_grid->nx * pv_grid->ny;
+
+   for (unsigned i = 1; i < total_elements; i++) {
       if (pv_grid->entries[i].v2 > max_val->v2) {
          max_val = &pv_grid->entries[i];
       }
@@ -186,18 +158,12 @@ pos_val_t *find_max_v2(const pos_val_grid_t *pv_grid) {
 
 // Frees memory allocated for positions+values
 void free_pos_val_grid(pos_val_grid_t *pv_grid) {
-   printf("Free memory allocated for positions+values (%u x %u entries)...\n",
-          pv_grid->nx, pv_grid->ny);
-
    free(pv_grid->entries);
    sum_bytes -= pv_grid->nx * pv_grid->ny * sizeof(pos_val_t);
 }
 
 // Frees memory allocated for values
 void free_value_grid(value_grid_t *val_grid) {
-   printf("Free memory allocated for values (%u x %u entries)...\n",
-          val_grid->nx, val_grid->ny);
-
    free(val_grid->entries);
    sum_bytes -= val_grid->nx * val_grid->ny * sizeof(value_t);
 }
@@ -213,14 +179,11 @@ int main(int argc, char *argv[]) {
    unsigned nx = (unsigned)atoi(argv[2]);
    unsigned ny = (unsigned)atoi(argv[3]);
 
-   const char *input_file_name = "values.txt";
+   const char *input_file_name = "values.bin";
    if (generate_random_values(input_file_name, nx, ny) != 0) {
-      fprintf(stderr, "Failed to write %u x %u coordinates to %s\n",
-              nx, ny, input_file_name);
+      fprintf(stderr, "Failed to write %u x %u coordinates to %s\n", nx, ny, input_file_name);
       return EXIT_FAILURE;
    }
-
-   sum_bytes = 0;
 
    for (unsigned r = 0; r < nrep; r++) {
       value_grid_t value_grid;
@@ -244,6 +207,5 @@ int main(int argc, char *argv[]) {
    }
 
    remove(input_file_name);
-
    return EXIT_SUCCESS;
 }
