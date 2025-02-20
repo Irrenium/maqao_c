@@ -107,7 +107,7 @@ int main (int argc, char *argv[]) {
    }
    const float seconds = (float) min/ (float) CLOCKS_PER_SEC;
    printf ("MIN %.3f seconds (%.2f per inner-iter per milliseconds)\n",
-           seconds, (seconds * 1000)/nb_inner_iters);
+           seconds, (seconds * 1000.0)/nb_inner_iters);
 
    // Median value
    const uint64_t med = tdiff[NB_METAS/2];
