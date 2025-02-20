@@ -95,7 +95,7 @@ int main (int argc, char *argv[]) {
       free (c);
    }
 
-   const unsigned nb_inner_iters = size * size * size; // TODO adjust for each kernel
+   const unsigned nb_inner_iters = size * size * repm; // TODO adjust for each kernel
    qsort (tdiff, NB_METAS, sizeof tdiff[0], cmp_uint64);
 
    // Minimum value: should be at least 2000 RDTSC-cycles
