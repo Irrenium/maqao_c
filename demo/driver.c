@@ -105,13 +105,14 @@ int main (int argc, char *argv[]) {
                "Rerun with more measure-repetitions\n");
       return EXIT_FAILURE;
    }
-   printf ("MIN %.3f seconds (%.2f per inner-iter)\n",
-           ( (float) min/ (float) CLOCKS_PER_SEC), ( (float) min/ (float) CLOCKS_PER_SEC) / nb_inner_iters);
+   const float seconds = (float) min/ (float) CLOCKS_PER_SEC)/ nb_inner_iters;
+   printf ("MIN %.3f seconds (%.2f per inner-iter per milliseconds)\n",
+           seconds, seconds * 1000);
 
    // Median value
    const uint64_t med = tdiff[NB_METAS/2];
-   printf ("MED %.3ld seconds (%.2f per inner-iter)\n",
-           med, (float) med / nb_inner_iters);
+   printf ("MED %.3ld seconds (%.2f per inner-iter per milliseconds)\n",
+           med, (float) med * 1000 / nb_inner_iters);
 
    // Stability: (med-min)/min
    const float stab = (med - min) * 100.0f / min;

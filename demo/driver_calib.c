@@ -86,7 +86,7 @@ int main (int argc, char *argv[]) {
       nanosleep (&two_seconds, NULL);
    }
 
-   const unsigned nb_inner_iters = size * size *repm; // TODO adjust for each kernel
+   const unsigned nb_inner_iters = size * size * repm; // TODO adjust for each kernel
    int i;
    for (i=0; i<repm; i++) {
       printf ("Instance %u/%u\n", i+1, repm);
@@ -96,16 +96,16 @@ int main (int argc, char *argv[]) {
       // Minimum value: should be at least 2000 seconds
       const float min = (float)(tdiff[i][0])/ (float) CLOCKS_PER_SEC;
 
-      printf ("MIN %.3f seconds (%.2f per inner-iter)\n",
-              min, (float) min / nb_inner_iters);
+      printf ("MIN %.3f seconds (%.2f per inner-iter per milliseconds)\n",
+              min, (float) min * 1000 / nb_inner_iters);
 
       // Median value
       const uint64_t med = tdiff[i][NB_METAS/2];
       if (med < 500) {
          printf ("Warning: median time is less than 500 seconds. Accurary is limited for that instance\n");
       }
-      printf ("MED %.3ld seconds (%.2f per inner-iter)\n",
-              med, (float) med / nb_inner_iters);
+      printf ("MED %.3ld seconds (%.2f per inner-iter per milliseconds)\n",
+              med, (float) med * 1000 / nb_inner_iters);
 
       // Stability: (med-min)/min
       const float stab = (med - min) * 100.0f / min;
