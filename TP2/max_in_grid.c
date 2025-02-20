@@ -159,39 +159,28 @@ int load_values(const char *file_name, value_grid_t *val_grid) {
 void load_positions(value_grid_t src, pos_val_grid_t *dst) {
     dst->nx = src.nx;
     dst->ny = src.ny;
-
-    size_t total_entries = src.nx * src.ny;
-    sum_bytes += total_entries * sizeof(pos_val_t*);
     
-    // Allocate memory for the array of pointers to pos_val_t
+    size_t total_entries = src.nx * src.ny;
+    
+    pos_val_t *data_block = malloc(total_entries * sizeof(pos_val_t));
     dst->entries = malloc(total_entries * sizeof(pos_val_t*));
-    if (!dst->entries) {
-        // Handle memory allocation failure
+    
+    if (!data_block || !dst->entries) {
+        free(data_block);
+        free(dst->entries);
         fprintf(stderr, "Memory allocation failed\n");
         return;
     }
+    
+    sum_bytes += total_entries * (sizeof(pos_val_t) + sizeof(pos_val_t*));
 
-    // Use a single loop to fill the entries
-    for (unsigned i = 0; i < total_entries; i++) {
-        const value_t *src_val = src.entries[i];
-
-        // Allocate memory for each pos_val_t
-        pos_val_t *current_entry = malloc(sizeof(pos_val_t));
-        if (!current_entry) {
-            // Handle memory allocation failure
-            fprintf(stderr, "Memory allocation for pos_val_t failed\n");
-            free(dst->entries); // Free previously allocated memory
-            return;
-        }
-
-        // Set the position and values directly
-        current_entry->x = i / src.ny; // Row index
-        current_entry->y = i % src.ny; // Column index
-        current_entry->v1 = src_val->v1;
-        current_entry->v2 = src_val->v2;
-
-        // Store the pointer in the entries array
-        dst->entries[i] = current_entry;
+    for (size_t i = 0; i < total_entries; i++) {
+        pos_val_t *current = &data_block[i];
+        current->x = i / src.ny;
+        current->y = i % src.ny;
+        current->v1 = src.entries[i]->v1;
+        current->v2 = src.entries[i]->v2;
+        dst->entries[i] = current;
     }
 }
 
