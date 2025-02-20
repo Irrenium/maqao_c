@@ -1,0 +1,10 @@
+Compilation:
+ - Compile max_in_grid.c to find v1 and v2 max values from a 2D grid of (v1,v2) pairs (randomly generated)
+ - Typical compilation command: gcc -O2 -g max_in_grid.c -o exe
+
+Execution:
+ - Usage: ./exe <nb repetitions> <nb points X> <nb points Y>
+ - Nb repetitions: number of times the experiment is repeated (from file loading to memory release), allows to increase runtime for more precise sampling-based profiling
+ - Nb points X: input size along X
+ - Nb points Y: input size along Y
+ - Recommended: with the baseline implementation, a good starting point is 2000 x 3000
