@@ -95,7 +95,7 @@ int main (int argc, char *argv[]) {
 
       // Minimum value: should be at least 2000 seconds
       const uint64_t min = tdiff[i][0];
-      const float min = min/ (float) CLOCKS_PER_SEC;
+      min = min/ (float) CLOCKS_PER_SEC;
 
       printf ("MIN %.3f seconds (%.2f per inner-iter)\n",
               min, (float) min / nb_inner_iters);
