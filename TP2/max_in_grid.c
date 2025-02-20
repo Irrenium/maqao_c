@@ -156,29 +156,43 @@ int load_values(const char *file_name, value_grid_t *val_grid) {
 }
 
 // Relate pairs to coordinates
-void load_positions (value_grid_t src, pos_val_grid_t *dst)
-{
-   dst->nx = src.nx;
-   dst->ny = src.ny;
+void load_positions(value_grid_t src, pos_val_grid_t *dst) {
+    dst->nx = src.nx;
+    dst->ny = src.ny;
 
-   sum_bytes += src.nx * src.ny * sizeof dst->entries[0];
-   dst->entries = malloc (src.nx * src.ny * sizeof dst->entries[0]);
+    size_t total_entries = src.nx * src.ny;
+    sum_bytes += total_entries * sizeof(pos_val_t*);
+    
+    // Allocate memory for the array of pointers to pos_val_t
+    dst->entries = malloc(total_entries * sizeof(pos_val_t*));
+    if (!dst->entries) {
+        // Handle memory allocation failure
+        fprintf(stderr, "Memory allocation failed\n");
+        return;
+    }
 
-   unsigned i, j;
-   for (i=0; i<src.nx; i++) {
-      for (j=0; j<src.ny; j++) {
-         const value_t *src_val = src.entries [i * src.ny + j];
+    // Use a single loop to fill the entries
+    for (unsigned i = 0; i < total_entries; i++) {
+        const value_t *src_val = src.entries[i];
 
-         pos_val_t *new_pos_val = malloc (sizeof new_pos_val[0]);
-         sum_bytes += sizeof *new_pos_val;
-         new_pos_val->x  = i;
-         new_pos_val->y  = j;
-         new_pos_val->v1 = src_val->v1;
-         new_pos_val->v2 = src_val->v2;
+        // Allocate memory for each pos_val_t
+        pos_val_t *current_entry = malloc(sizeof(pos_val_t));
+        if (!current_entry) {
+            // Handle memory allocation failure
+            fprintf(stderr, "Memory allocation for pos_val_t failed\n");
+            free(dst->entries); // Free previously allocated memory
+            return;
+        }
 
-         dst->entries [i * src.ny + j] = new_pos_val;
-      }
-   }
+        // Set the position and values directly
+        current_entry->x = i / src.ny; // Row index
+        current_entry->y = i % src.ny; // Column index
+        current_entry->v1 = src_val->v1;
+        current_entry->v2 = src_val->v2;
+
+        // Store the pointer in the entries array
+        dst->entries[i] = current_entry;
+    }
 }
 
 // Compares two pos_val entries (to be used with qsort)
