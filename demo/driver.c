@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h> // atoi, qsort
 #include <stdint.h>
+#include <time.h> // nanosleep
 
 #define NB_METAS 31
+#define CLOCKS_PER_SEC 1000000
 
 //extern uint64_t rdtsc ();
 
@@ -80,7 +82,7 @@ int main (int argc, char *argv[]) {
       for (i=0; i<repm; i++) {
          kernel (size, a, b, c);
       }
-      
+
       const clock_t t2 = clock();
       tdiff[m] = (t2 - t1) / CLOCKS_PER_SEC;
 
