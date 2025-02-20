@@ -1,0 +1,6 @@
+********************************************************************************
+MAQAO 2.19.0 - 10b41bf83a578066b525a917f2e4ea8371e272af::20240119-161848 || 2024/01/19
+maqao oneview -R1 -- ./measure 2000 5 500 
+CPY:  [true] ./measure --> /my_folder/demo/maqao_c/demo/maqao_2025-02-20_12-10-27/binaries/measure
+CMD:   /my_folder/bin/maqao lprof  --xp="/my_folder/demo/maqao_c/demo/maqao_2025-02-20_12-10-27/tools/lprof_npsu_run_0" --mpi-command=""   -- /my_folder/demo/maqao_c/demo/maqao_2025-02-20_12-10-27/binaries/measure  2000 5 500
+CMD:  /my_folder/bin/maqao otter  -input=/my_folder/demo/maqao_c/demo/maqao_2025-02-20_12-10-27/OTTER/input_manifest.csv -output=/my_folder/demo/maqao_c/demo/maqao_2025-02-20_12-10-27/OTTER/output_manifest.csv
