@@ -19,7 +19,7 @@ static void init_array_2 (int n, float a[n][n]) {
          a[i][j] = (float) rand() / RAND_MAX;
 }
 
-static void init_array_2 (int n, float a[n]) {
+static void init_array_1 (int n, float a[n]) {
    int i;
 
    for (i=0; i<n; i++)
