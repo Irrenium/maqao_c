@@ -1,0 +1,6 @@
+********************************************************************************
+MAQAO 2.21.1 - Build information not available || 2025/02/20
+maqao oneview -R1 uarch=ARM_NEOVERSE_N2 -- ./measure 2000 100 100 
+CPY:  [true] ./measure --> /my_folder/demo/maqao_c/demo/maqao_2025-02-20_11-47-59/binaries/measure
+CMD:   /my_folder/bin/maqao lprof _caller=oneview  --xp="/my_folder/demo/maqao_c/demo/maqao_2025-02-20_11-47-59/tools/lprof_npsu_run_0" --mpi-command="" --collect-CPU-time-intervals --collect-topology   -- /my_folder/demo/maqao_c/demo/maqao_2025-02-20_11-47-59/binaries/measure  2000 100 100
+###   ERROR 5   ###
