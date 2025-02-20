@@ -18,7 +18,7 @@ void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]) {
 #elif defined OPT2
 
 #include <string.h> // memset
-#include <immintrin.h> // For AVX/SSE intrinsics
+//#include <immintrin.h> // For AVX/SSE intrinsics
 
 void kernel(unsigned n, float a[n], float b[n], float c[n][n]) {
     unsigned i, j;
