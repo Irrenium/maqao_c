@@ -1,7 +1,7 @@
 #ifdef OPT1
 
 /* Removing of store to load dependency (array ref replaced by scalar) */
-void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]) {
+void kernel (unsigned n, float a[n], float b[n], float c[n][n]) {
    for (unsigned i = 0; i < n; i++) {
       float temp  = a[i];
       float inv_b = 1.0f / b[i];  // Only one division per row
