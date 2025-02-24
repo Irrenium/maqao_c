@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-O2 -g -Wall
-OPTFLAGS=-O3 -g -Wall
+CFLAGS=-O2 -g -Wall -fopenmp
+OPTFLAGS=-O3 -g -Wall -fopenmp
 OBJS_COMMON=kernel.o
 
 all:	check calibrate measure
