@@ -10,6 +10,7 @@
  */
  #include <stdio.h>  // printf, fopen, etc.
 #include <stdlib.h> // atoi, malloc, free, etc.
+#include <omp.h>
 
 // Abstract values
 typedef struct {

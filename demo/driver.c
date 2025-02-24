@@ -2,6 +2,7 @@
 #include <stdlib.h> // atoi, qsort
 #include <stdint.h>
 #include <time.h> // nanosleep
+#include <omp.h>
 
 #define NB_METAS 31
 #define CLOCKS_PER_SEC 1000000

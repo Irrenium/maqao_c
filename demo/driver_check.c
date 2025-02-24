@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> // atoi
 #include <stdint.h>
+#include <omp.h>
 
 //extern uint64_t rdtsc ();
 
