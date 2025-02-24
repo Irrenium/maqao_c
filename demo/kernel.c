@@ -2,17 +2,17 @@
 
 /* Removing of store to load dependency (array ref replaced by scalar) */
 void kernel (unsigned n, float a[n][n], float b[n][n], float c[n][n]) {
-   int i, j, k;
+   for (unsigned i = 0; i < n; i++) {
+      float temp  = a[i];
+      float inv_b = 1.0f / b[i];  // Only one division per row
+      float sum   = 0.0f;
 
-   for (i=0; i<n; i++)
-      for (j=0; j<n; j++) {
-         float s = 0.0f;
-
-         for (k=0; k<n; k++)
-            s += a[i][k] * b[k][j];
-
-         c[i][j] = s;
+      for (unsigned j = 0; j < n; j++) {
+            sum += c[i][j];
       }
+      temp += sum * inv_b;
+      a[i] = temp;
+   }
 }
 
 #elif defined OPT2
